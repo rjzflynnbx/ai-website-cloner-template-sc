@@ -25,7 +25,7 @@ export function generateContentItemYaml(
   const componentName = manifest.componentName;
   const folderTemplateName = `${templateName} Folder`;
 
-  const dataFolderPath = `${SITE_CONTENT_BASE_PATH}/${siteName}/items/site-data`;
+  const dataFolderPath = `${SITE_CONTENT_BASE_PATH}/${siteName}/items/site-data/Data`;
   const sitecoreDataPath = `/sitecore/content/industry-verticals/${siteName}/Data`;
 
   // 1. Datasource folder item

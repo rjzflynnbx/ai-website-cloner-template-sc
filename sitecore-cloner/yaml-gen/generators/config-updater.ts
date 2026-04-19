@@ -177,14 +177,13 @@ export function generateXmCloudBuildUpdater(config: SiteConfig): JsonConfigUpdat
         if (scsModulesContainer?.modules) {
           const modules = scsModulesContainer.modules;
           const contentNamespace = `Project.${pascalSiteName}-Content`;
-          const mediaNamespace = `Project.${pascalSiteName}-Media`;
 
           if (!modules.includes(contentNamespace)) {
             modules.push(contentNamespace);
           }
-          if (!modules.includes(mediaNamespace)) {
-            modules.push(mediaNamespace);
-          }
+          // Note: Media module is NOT added to postActions until media items
+          // are serialized. Adding it without items causes SCS push failure:
+          // "Configured source item path ... did not exist in serialized items"
         }
       }
 
