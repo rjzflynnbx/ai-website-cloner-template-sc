@@ -28,7 +28,7 @@ import {
   generateCommonModuleUpdater,
   generateXmCloudBuildUpdater,
 } from './generators/config-updater.js';
-import { RENDERINGS_FIELD_ID, RENDERINGS_BASE_PATH } from './constants.js';
+import { RENDERINGS_FIELD_ID, RENDERINGS_BASE_PATH, TEMPLATES_BASE_PATH } from './constants.js';
 
 export function runAssembly(config: SiteConfig): AssemblyResult {
   const result: AssemblyResult = {
@@ -73,9 +73,18 @@ export function runAssembly(config: SiteConfig): AssemblyResult {
   }
 
   // Pre-allocate template folder GUIDs (one per unique templateFolder)
+  // Read existing template folder GUIDs from target repo (avoid wrong parent refs)
   const folders = new Set(manifests.map((m) => m.templateFolder));
-  for (const f of folders) {
-    guids.get(`template-folder:${f}`);
+  const existingTemplateFolders = new Set<string>();
+  for (const folder of folders) {
+    const existingId = readTemplateFolderGuid(config.targetDir, folder);
+    if (existingId) {
+      guids.set(`template-folder:${folder}`, existingId);
+      existingTemplateFolders.add(folder);
+      console.log(`Using existing template folder '${folder}' GUID: ${existingId}`);
+    } else {
+      guids.get(`template-folder:${folder}`);
+    }
   }
 
   // Read existing rendering folder GUIDs from target repo (avoid overwriting)
@@ -300,6 +309,25 @@ function readRenderingsProjectFolder(targetDir: string): string | null {
  */
 function readRenderingFolderGuid(targetDir: string, folderName: string): string | null {
   const yamlPath = join(targetDir, RENDERINGS_BASE_PATH, `${folderName}.yml`);
+  if (!existsSync(yamlPath)) return null;
+
+  try {
+    const content = readFileSync(yamlPath, 'utf-8');
+    const idMatch = content.match(/^ID:\s*"([^"]+)"/m);
+    if (idMatch) return idMatch[1];
+  } catch {
+    // Fall through
+  }
+
+  return null;
+}
+
+/**
+ * Read an existing template folder GUID from the target repo.
+ * Looks for {TEMPLATES_BASE_PATH}/Components/{folderName}.yml and extracts the ID field.
+ */
+function readTemplateFolderGuid(targetDir: string, folderName: string): string | null {
+  const yamlPath = join(targetDir, TEMPLATES_BASE_PATH, 'Components', `${folderName}.yml`);
   if (!existsSync(yamlPath)) return null;
 
   try {
