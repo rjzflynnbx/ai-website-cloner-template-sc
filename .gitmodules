@@ -1,0 +1,3 @@
+[submodule "reference/industry-verticals"]
+	path = reference/industry-verticals
+	url = https://github.com/Sitecore/Sitecore.Demo.SitecoreAI.IndustryVerticals.SiteTemplates.git
