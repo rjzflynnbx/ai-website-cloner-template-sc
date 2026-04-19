@@ -1,7 +1,7 @@
 {
   "$schema": "field-manifest-v1",
-  "componentName": "CardList",
-  "templateName": "Card List",
+  "componentName": "AcmeCardList",
+  "templateName": "Acme Card List",
   "templateFolder": "Page Content",
   "variants": ["Default"],
   "hasDatasourceChildren": true,
@@ -19,7 +19,7 @@
     }
   ],
   "childTemplate": {
-    "name": "Card",
+    "name": "Acme Card",
     "fields": [
       {
         "name": "Title",
@@ -99,7 +99,7 @@
       }
     ]
   },
-  "graphqlQuery": "query CardListQuery($datasource: String!, $language: String!) { datasource: item(path: $datasource, language: $language) { ... on CardList { children { results { ... on Card { Title { value } Description { value } CardImage { value src alt } CardLink { value href text linktype } } } } } } }",
+  "graphqlQuery": "query AcmeCardListQuery($datasource: String!, $language: String!) { datasource: item(path: $datasource, language: $language) { ... on AcmeCardList { children { results { ... on AcmeCard { Title { value } Description { value } CardImage { value src alt } CardLink { value href text linktype } } } } } } }",
   "placeholder": "headless-main",
   "renderingParams": []
 }

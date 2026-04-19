@@ -18,16 +18,16 @@ interface Fields {
   CTALink: LinkField;
 }
 
-export type HeroBannerProps = ComponentProps & {
+export type AcmeHeroBannerProps = ComponentProps & {
   fields: Fields;
 };
 
-export const Default = (props: HeroBannerProps): JSX.Element => {
+export const Default = (props: AcmeHeroBannerProps): JSX.Element => {
   const id = props.params.RenderingIdentifier;
 
   return (
     <section
-      className={`component hero-banner ${props.params.styles ?? ''}`}
+      className={`component acme-hero-banner ${props.params.styles ?? ''}`}
       id={id ? id : undefined}
     >
       <div className="relative flex min-h-[60vh] items-center justify-center overflow-hidden">

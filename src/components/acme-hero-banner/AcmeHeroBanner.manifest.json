@@ -1,7 +1,7 @@
 {
   "$schema": "field-manifest-v1",
-  "componentName": "HeroBanner",
-  "templateName": "Hero Banner",
+  "componentName": "AcmeHeroBanner",
+  "templateName": "Acme Hero Banner",
   "templateFolder": "Page Content",
   "variants": ["Default"],
   "hasDatasourceChildren": false,

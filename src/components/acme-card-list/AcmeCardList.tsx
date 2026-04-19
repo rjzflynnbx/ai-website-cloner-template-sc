@@ -12,29 +12,29 @@ import {
 import { useSitecore } from '@sitecore-content-sdk/nextjs';
 import { ComponentProps } from 'lib/component-props';
 
-interface CardFields {
+interface AcmeCardFields {
   Title: Field<string>;
   Description: RichTextField;
   CardImage: ImageField;
   CardLink: LinkField;
 }
 
-interface CardItem {
+interface AcmeCardItem {
   id: string;
   name: string;
-  fields: CardFields;
+  fields: AcmeCardFields;
 }
 
 interface Fields {
   Heading: Field<string>;
-  children: CardItem[];
+  children: AcmeCardItem[];
 }
 
-export type CardListProps = ComponentProps & {
+export type AcmeCardListProps = ComponentProps & {
   fields: Fields;
 };
 
-export const Default = (props: CardListProps): JSX.Element => {
+export const Default = (props: AcmeCardListProps): JSX.Element => {
   const id = props.params.RenderingIdentifier;
   const { page } = useSitecore();
   const isEditing = page.mode.isEditing;
@@ -42,7 +42,7 @@ export const Default = (props: CardListProps): JSX.Element => {
 
   return (
     <section
-      className={`component card-list ${props.params.styles ?? ''}`}
+      className={`component acme-card-list ${props.params.styles ?? ''}`}
       id={id ? id : undefined}
     >
       <div className="container mx-auto px-6 py-16">

@@ -78,13 +78,27 @@ export function runAssembly(config: SiteConfig): AssemblyResult {
     guids.get(`template-folder:${f}`);
   }
 
+  // Read existing rendering folder GUIDs from target repo (avoid overwriting)
+  const existingRenderingFolders = new Set<string>();
+  for (const folder of folders) {
+    const existingId = readRenderingFolderGuid(config.targetDir, folder);
+    if (existingId) {
+      guids.set(`rendering-folder:${folder}`, existingId);
+      existingRenderingFolders.add(folder);
+      console.log(`Using existing rendering folder '${folder}' GUID: ${existingId}`);
+    }
+  }
+
   // -----------------------------------------------------------------------
   // 3. Generate per-component YAML
   // -----------------------------------------------------------------------
 
   // Generate rendering folders once per unique templateFolder (deduplicated)
+  // Skip folders that already exist in the target repo
   for (const folder of folders) {
-    result.yamlFiles.push(...generateRenderingFolderYaml(folder, guids));
+    if (!existingRenderingFolders.has(folder)) {
+      result.yamlFiles.push(...generateRenderingFolderYaml(folder, guids));
+    }
   }
 
   for (const manifest of manifests) {
@@ -267,6 +281,25 @@ function readIvSitesParentId(targetDir: string): string | null {
 function readRenderingsProjectFolder(targetDir: string): string | null {
   // The .yml file is at the same level as the directory, just with .yml extension
   const yamlPath = join(targetDir, RENDERINGS_BASE_PATH + '.yml');
+  if (!existsSync(yamlPath)) return null;
+
+  try {
+    const content = readFileSync(yamlPath, 'utf-8');
+    const idMatch = content.match(/^ID:\s*"([^"]+)"/m);
+    if (idMatch) return idMatch[1];
+  } catch {
+    // Fall through
+  }
+
+  return null;
+}
+
+/**
+ * Read an existing rendering folder GUID from the target repo.
+ * Looks for {RENDERINGS_BASE_PATH}/{folderName}.yml and extracts the ID field.
+ */
+function readRenderingFolderGuid(targetDir: string, folderName: string): string | null {
+  const yamlPath = join(targetDir, RENDERINGS_BASE_PATH, `${folderName}.yml`);
   if (!existsSync(yamlPath)) return null;
 
   try {
