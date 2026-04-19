@@ -1,0 +1,105 @@
+{
+  "$schema": "field-manifest-v1",
+  "componentName": "CardList",
+  "templateName": "Card List",
+  "templateFolder": "Page Content",
+  "variants": ["Default"],
+  "hasDatasourceChildren": true,
+  "fields": [],
+  "parentFields": [
+    {
+      "name": "Heading",
+      "sitecoreType": "Single-Line Text",
+      "tsType": "string",
+      "renderComponent": "Text",
+      "sortOrder": 100,
+      "shared": false,
+      "source": "",
+      "sampleValue": "Our Services"
+    }
+  ],
+  "childTemplate": {
+    "name": "Card",
+    "fields": [
+      {
+        "name": "Title",
+        "sitecoreType": "Single-Line Text",
+        "tsType": "string",
+        "renderComponent": "Text",
+        "sortOrder": 100,
+        "shared": false,
+        "source": "",
+        "sampleValue": "Card Title"
+      },
+      {
+        "name": "Description",
+        "sitecoreType": "Rich Text",
+        "tsType": "string",
+        "renderComponent": "RichText",
+        "sortOrder": 200,
+        "shared": false,
+        "source": "",
+        "sampleValue": "<p>Card description text goes here.</p>"
+      },
+      {
+        "name": "CardImage",
+        "sitecoreType": "Image",
+        "tsType": "ImageField",
+        "renderComponent": "Image",
+        "sortOrder": 300,
+        "shared": false,
+        "source": "query:$siteMedia",
+        "sampleValue": {
+          "src": "/images/card-placeholder.jpg",
+          "alt": "Service illustration"
+        }
+      },
+      {
+        "name": "CardLink",
+        "sitecoreType": "General Link",
+        "tsType": "LinkField",
+        "renderComponent": "Link",
+        "sortOrder": 400,
+        "shared": false,
+        "source": "",
+        "sampleValue": {
+          "href": "/services",
+          "text": "Learn More",
+          "linktype": "internal"
+        }
+      }
+    ],
+    "sampleChildren": [
+      {
+        "itemName": "Strategy Consulting",
+        "values": {
+          "Title": "Strategy Consulting",
+          "Description": "<p>Expert guidance to help your business navigate complex challenges and seize new opportunities.</p>",
+          "CardImage": { "src": "/images/strategy.jpg", "alt": "Strategy consulting" },
+          "CardLink": { "href": "/services/strategy", "text": "Explore Strategy", "linktype": "internal" }
+        }
+      },
+      {
+        "itemName": "Digital Transformation",
+        "values": {
+          "Title": "Digital Transformation",
+          "Description": "<p>Modernize your operations with cutting-edge technology solutions tailored to your needs.</p>",
+          "CardImage": { "src": "/images/digital.jpg", "alt": "Digital transformation" },
+          "CardLink": { "href": "/services/digital", "text": "Go Digital", "linktype": "internal" }
+        }
+      },
+      {
+        "itemName": "Innovation Labs",
+        "values": {
+          "Title": "Innovation Labs",
+          "Description": "<p>From concept to prototype, our innovation labs turn bold ideas into market-ready products.</p>",
+          "CardImage": { "src": "/images/innovation.jpg", "alt": "Innovation labs" },
+          "CardLink": { "href": "/services/innovation", "text": "Start Innovating", "linktype": "internal" }
+        }
+      }
+    ]
+  },
+  "graphqlQuery": "query CardListQuery($datasource: String!, $language: String!) { datasource: item(path: $datasource, language: $language) { ... on CardList { children { results { ... on Card { Title { value } Description { value } CardImage { value src alt } CardLink { value href text linktype } } } } } } }",
+  "placeholder": "headless-main",
+  "renderingParams": []
+}

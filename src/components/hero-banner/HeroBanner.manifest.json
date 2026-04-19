@@ -1,0 +1,62 @@
+{
+  "$schema": "field-manifest-v1",
+  "componentName": "HeroBanner",
+  "templateName": "Hero Banner",
+  "templateFolder": "Page Content",
+  "variants": ["Default"],
+  "hasDatasourceChildren": false,
+  "fields": [
+    {
+      "name": "Title",
+      "sitecoreType": "Single-Line Text",
+      "tsType": "string",
+      "renderComponent": "Text",
+      "sortOrder": 100,
+      "shared": false,
+      "source": "",
+      "sampleValue": "Welcome to Acme Corp"
+    },
+    {
+      "name": "Subtitle",
+      "sitecoreType": "Rich Text",
+      "tsType": "string",
+      "renderComponent": "RichText",
+      "sortOrder": 200,
+      "shared": false,
+      "source": "",
+      "sampleValue": "<p>Building the future, one innovation at a time. Discover what makes us different.</p>"
+    },
+    {
+      "name": "BackgroundImage",
+      "sitecoreType": "Image",
+      "tsType": "ImageField",
+      "renderComponent": "Image",
+      "sortOrder": 300,
+      "shared": false,
+      "source": "query:$siteMedia",
+      "sampleValue": {
+        "src": "/images/hero-bg.jpg",
+        "alt": "Acme Corp headquarters"
+      }
+    },
+    {
+      "name": "CTALink",
+      "sitecoreType": "General Link",
+      "tsType": "LinkField",
+      "renderComponent": "Link",
+      "sortOrder": 400,
+      "shared": false,
+      "source": "",
+      "sampleValue": {
+        "href": "/about",
+        "text": "Learn More",
+        "linktype": "internal"
+      }
+    }
+  ],
+  "childTemplate": null,
+  "parentFields": null,
+  "graphqlQuery": null,
+  "placeholder": "headless-main",
+  "renderingParams": []
+}

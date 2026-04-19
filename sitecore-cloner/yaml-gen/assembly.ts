@@ -4,8 +4,8 @@
  * either writes files to the target repo or prints a dry-run summary.
  */
 
-import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, cpSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, cpSync, copyFileSync } from 'node:fs';
+import { join, dirname, resolve, basename, relative } from 'node:path';
 
 import type {
   FieldManifest,
@@ -42,11 +42,13 @@ export function runAssembly(config: SiteConfig): AssemblyResult {
   // -----------------------------------------------------------------------
   // 1. Read manifests
   // -----------------------------------------------------------------------
-  const manifests = readManifests(config.manifestDir);
-  if (manifests.length === 0) {
+  const manifestEntries = readManifests(config.manifestDir);
+  if (manifestEntries.length === 0) {
     result.errors.push(`No .manifest.json files found in ${config.manifestDir}`);
     return result;
   }
+
+  const manifests = manifestEntries.map((e) => e.manifest);
 
   console.log(`Found ${manifests.length} manifest(s):`);
   for (const m of manifests) {
@@ -124,12 +126,43 @@ export function runAssembly(config: SiteConfig): AssemblyResult {
   }
 
   // -----------------------------------------------------------------------
+  // 6b. Collect component files to copy (sibling .tsx/.ts files next to each manifest)
+  // -----------------------------------------------------------------------
+  const componentFiles: Array<{ src: string; dest: string }> = [];
+  for (const entry of manifestEntries) {
+    const manifestDir = dirname(entry.filePath);
+    const componentDirName = basename(manifestDir);
+    const destDir = join(siteTargetDir, 'src', 'components', componentDirName);
+
+    try {
+      const files = readdirSync(manifestDir);
+      for (const file of files) {
+        if (file.endsWith('.manifest.json')) continue;
+        if (file.endsWith('.tsx') || file.endsWith('.ts') || file.endsWith('.css')) {
+          componentFiles.push({
+            src: join(manifestDir, file),
+            dest: join(destDir, file),
+          });
+        }
+      }
+    } catch {
+      result.warnings.push(`Could not read component directory: ${manifestDir}`);
+    }
+  }
+
+  if (componentFiles.length > 0) {
+    result.scaffoldingFiles.push(
+      ...componentFiles.map((f) => relative(config.targetDir, f.dest))
+    );
+  }
+
+  // -----------------------------------------------------------------------
   // 7. Write or dry-run
   // -----------------------------------------------------------------------
   if (config.dryRun) {
     printDryRun(result, guids);
   } else {
-    writeResults(result, config, scaffoldingDir, siteTargetDir);
+    writeResults(result, config, scaffoldingDir, siteTargetDir, componentFiles);
   }
 
   // -----------------------------------------------------------------------
@@ -156,26 +189,31 @@ export function runAssembly(config: SiteConfig): AssemblyResult {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-function readManifests(manifestDir: string): FieldManifest[] {
+interface ManifestEntry {
+  manifest: FieldManifest;
+  filePath: string;
+}
+
+function readManifests(manifestDir: string): ManifestEntry[] {
   const absDir = resolve(manifestDir);
   if (!existsSync(absDir)) return [];
 
   const files = findFiles(absDir, '.manifest.json');
-  const manifests: FieldManifest[] = [];
+  const entries: ManifestEntry[] = [];
 
   for (const file of files) {
     try {
       const raw = readFileSync(file, 'utf-8');
       const parsed = JSON.parse(raw) as FieldManifest;
       if (parsed.$schema === 'field-manifest-v1') {
-        manifests.push(parsed);
+        entries.push({ manifest: parsed, filePath: file });
       }
     } catch (err) {
       console.warn(`Skipping invalid manifest: ${file}`, err);
     }
   }
 
-  return manifests;
+  return entries;
 }
 
 function findFiles(dir: string, suffix: string): string[] {
@@ -271,7 +309,8 @@ function writeResults(
   result: AssemblyResult,
   config: SiteConfig,
   scaffoldingDir: string,
-  siteTargetDir: string
+  siteTargetDir: string,
+  componentFiles: Array<{ src: string; dest: string }>
 ): void {
   const targetDir = config.targetDir;
 
@@ -297,7 +336,12 @@ function writeResults(
 
   // Copy scaffolding (with template substitution for package.json)
   if (existsSync(scaffoldingDir)) {
-    cpSync(scaffoldingDir, siteTargetDir, { recursive: true });
+    try {
+      cpSync(scaffoldingDir, siteTargetDir, { recursive: true });
+    } catch (err) {
+      console.error(`Failed to copy scaffolding: ${err}`);
+      throw err;
+    }
 
     // Template substitution in package.json
     const pkgPath = join(siteTargetDir, 'package.json');
@@ -308,6 +352,15 @@ function writeResults(
         .replace(/\{\{SITE_DISPLAY_NAME\}\}/g, config.siteDisplayName);
       writeFileSync(pkgPath, pkgContent, 'utf-8');
     }
+  }
+
+  // Copy component files from staging area to target site
+  for (const cf of componentFiles) {
+    mkdirSync(dirname(cf.dest), { recursive: true });
+    copyFileSync(cf.src, cf.dest);
+  }
+  if (componentFiles.length > 0) {
+    console.log(`Copied ${componentFiles.length} component file(s) to target site`);
   }
 
   console.log(`\nFiles written to: ${targetDir}`);
