@@ -27,7 +27,7 @@ import { renderYamlItem, bracedGuid, guidList } from '../yaml-writer.js';
 
 /** Well-known template GUIDs for site structure items */
 const FOLDER_TEMPLATE = 'a87a00b1-e6db-45ab-8b54-636fec3b5523';
-const PAGE_TEMPLATE = '76036f5e-cbce-46d1-af0a-4143f9b557aa'; // Standard page template
+const PAGE_TEMPLATE = '98e60957-0783-4a9a-85cc-77dad30e9711'; // Headless page template (confirmed from all IV sites)
 const SITE_GROUPING_TEMPLATE = '8357f958-9aaa-46db-8898-36448a96356f'; // Site Grouping folder
 const SITE_GROUPING_ITEM_TEMPLATE = 'e46f3af2-39fa-4866-a157-7017c4b2a40c'; // Site Grouping item
 
@@ -75,6 +75,7 @@ export function generateSiteDefinitionYaml(
       parent: ivSitesParentId,
       template: HEADLESS_SITE_TEMPLATE,
       path: sitecoreBase,
+      branchId: SETTINGS_BRANCH_ID,
       sharedFields: [
         {
           id: SITE_MODULES_FIELD_ID,
@@ -82,14 +83,19 @@ export function generateSiteDefinitionYaml(
           value: guidList(SITE_MODULES),
         },
         {
+          id: SITE_MEDIA_LIBRARY_FIELD_ID,
+          hint: 'SiteMediaLibrary',
+          value: bracedGuid(guids.siteMedia()),
+        },
+        {
           id: SITE_NAME_FIELD_ID,
           hint: 'Name',
           value: displayName,
         },
         {
-          id: SITE_MEDIA_LIBRARY_FIELD_ID,
-          hint: 'SiteMediaLibrary',
-          value: bracedGuid(guids.siteMedia()),
+          id: RENDERING_SHARED_REV_ID,
+          hint: '__Shared revision',
+          value: guids.get('site-root-rev'),
         },
       ],
       languages: [
@@ -222,7 +228,7 @@ export function generateSiteDefinitionYaml(
         { id: RENDERING_SHARED_REV_ID, hint: '__Shared revision', value: guids.get('site-grouping-rev') },
         { id: SGI_TARGET_HOSTNAME, hint: 'TargetHostName', value: '' },
         { id: SGI_LANGUAGE, hint: 'Language', value: 'en' },
-        { id: SGI_RENDERING_HOST, hint: 'RenderingHost', value: 'Default' },
+        { id: SGI_RENDERING_HOST, hint: 'RenderingHost', value: siteName },
       ],
       languages: [
         {
